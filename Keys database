@@ -1,0 +1,94 @@
+a.	Display a list of all property names and their property id’s for Owner Id: 1426. 
+
+
+SELECT dbo.OwnerProperty.OwnerId,dbo.Property.Name AS Property_Name,
+dbo.Property.Id AS Property_ID 
+FROM dbo.Ownerproperty 
+LEFT JOIN dbo.Property ON dbo.OwnerProperty.PropertyId=dbo.Property.Id 
+WHERE OwnerId=1426
+
+b. Display the current home value for each property in question a).
+
+SELECT dbo.Property.Name AS Property_Name,
+dbo.PropertyHomeValue.Value AS Home_Value
+FROM dbo.Ownerproperty 
+Left Join
+dbo.Property ON dbo.OwnerProperty.PropertyId=dbo.Property.Id
+Left Join 
+dbo.PropertyHomeValue ON dbo.PropertyHomeValue.PropertyId  = dbo.Property.Id
+
+WHERE OwnerId=1426 and dbo.PropertyHomeValue.IsActive=1
+
+
+C. For each property in question a), return the following:                                                                      
+i.	Using rental payment amount, rental payment frequency, tenant start date and tenant end date to write a query that returns the sum of all payments from start date to end date. 
+
+
+
+SELECT
+
+CASE
+
+WHEN dbo.TenantProperty.PaymentFrequencyId=3 THEN   DATEDIFF(DAY,StartDate, EndDate)/( 365 / 12 ) * dbo.TenantProperty.PaymentAmount
+WHEN dbo.TenantProperty.PaymentFrequencyId=2 THEN   DATEDIFF(DAY,StartDate, EndDate)* dbo.TenantProperty.PaymentAmount/14
+ELSE DATEDIFF(WEEK,StartDate, EndDate) * dbo.TenantProperty.PaymentAmount
+
+
+END AS Total,
+
+dbo.OwnerProperty.OwnerId,
+dbo.TenantProperty.PaymentAmount,
+dbo.TenantProperty.StartDate,
+dbo.TenantProperty.EndDate,
+dbo.TenantProperty.PaymentFrequencyId, 
+dbo.Property.Name AS Property_Name,
+dbo.Property.Id AS Property_ID 
+
+FROM dbo.Ownerproperty
+Left Join dbo.Property ON dbo.OwnerProperty.PropertyId=dbo.Property.Id
+Left Join dbo.TenantProperty ON dbo.TenantProperty.PropertyId=dbo.Property.Id 
+WHERE OwnerId=1426
+
+ii.	Display the yield. 
+
+SELECT
+CASE
+
+WHEN dbo.TenantProperty.PaymentFrequencyId=3 THEN   ((DATEDIFF(DAY,StartDate,EndDate)/( 365 / 12 ) * dbo.TenantProperty.PaymentAmount)/dbo.PropertyHomeValue.Value)*100
+WHEN dbo.TenantProperty.PaymentFrequencyId=2 THEN   DATEDIFF(DAY,StartDate, EndDate)* dbo.TenantProperty.PaymentAmount/14/dbo.PropertyHomeValue.Value*100
+ELSE DATEDIFF(WEEK,StartDate, EndDate) * dbo.TenantProperty.PaymentAmount/dbo.PropertyHomeValue.Value*100
+END AS Rental_Yield, dbo.OwnerProperty.OwnerId,dbo.PropertyHomeValue.Value AS HomeValue,
+dbo.TenantProperty.PaymentAmount,
+dbo.TenantProperty.StartDate,
+dbo.TenantProperty.EndDate,
+dbo.TenantProperty.PaymentFrequencyId, 
+dbo.Property.NAME AS Property_Name,
+dbo.Property.Id AS Property_ID FROM dbo.Ownerproperty
+LEFT JOIN dbo.Property ON dbo.OwnerProperty.PropertyId=dbo.Property.Id
+LEFT JOIN dbo.TenantProperty ON
+dbo.TenantProperty.PropertyId=dbo.Property.Id
+LEFT JOIN dbo.PropertyHomeValue ON dbo.PropertyHomeValue.PropertyId=dbo.Property.Id
+WHERE OwnerId=1426 AND dbo.PropertyHomeValue.IsActive=1
+
+
+d) Display all the jobs available
+
+SELECT * FROM dbo.Job WHERE JobStatusId=1
+
+
+
+e) Display all property names, current tenants first and last names and rental payments per week/ fortnight/month for the properties in question a).
+
+
+SELECT 
+dbo.TenantProperty.PaymentAmount,dbo.Person.FirstName,dbo.Person.LastName,
+dbo.Property.NAME AS Property_Name,dbo.Property.Id AS Property_ID
+FROM dbo.Ownerproperty
+LEFT JOIN dbo.Property ON dbo.OwnerProperty.PropertyId=dbo.Property.Id
+LEFT JOIN dbo.TenantProperty ON
+dbo.TenantProperty.PropertyId=dbo.Property.Id 
+LEFT JOIN dbo.Person ON
+dbo.TenantProperty.TenantId = dbo.Person.Id 
+WHERE OwnerId=1426
+
+
